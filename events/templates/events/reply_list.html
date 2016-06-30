@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load staticfiles bootstrap3 %}
+
+{% block content %}
+    {% bootstrap_messages %}
+
+    {% if object_list %}
+
+        <table class="table table-bordered col-ms-6">
+            <thead>
+            <tr>
+                <th>Reply Text</th>
+                <th>Created At</th>
+                <th>Last Modified</th>
+                <th>Posted At</th>
+                <th>Reply Link</th>
+                <th>Status</th>
+                <th>Writer</th>
+                <th>event</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for object in object_list %}
+                <tr>
+                    <td><a href="{{ object.get_absolute_url }}">{{ object.reply_text }}</a></td>
+                    <td>{{ object.created_at }}</td>
+                    <td>{{ object.last_modified }}</td>
+                    <td>{{ object.posted_at }}</td>
+                    <td>{{ object.reply_link }}</td>
+                    <td>{{ object.get_status_display }}</td>
+                    <td>{{ object.writer.writer_user.profile_user.get_full_name }}</td>
+                    <td>{{ object.event.title }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% bootstrap_pagination page_obj %}
+
+    {% else %}
+        No singles Yet.
+    {% endif %}
+{% endblock %}

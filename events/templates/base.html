@@ -1,0 +1,83 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>
+        {% block title %}
+            {{ view.page_title }} | SpeedateEvent
+        {% endblock %}
+    </title>
+    <link href="{% static "bootstrap/css/bootstrap.css" %}" rel="stylesheet">
+    <style>
+        li{
+            color: darkcyan;
+        }
+        .event_label{
+            color: darkolivegreen;
+            font-size: large;
+        }
+</style>
+</head>
+<body>
+
+<div class="container">
+<div class="navbar navbar-inverse ">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+          <div>
+                <a class="navbar-brand" href="###">SpeedateEvent <3</a>
+                <a class="navbar-brand" href="###">{{ view.page_title }}</a>
+          </div>
+      </div>
+      <div class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li>{% block top_link_2 %}{% endblock %}</li>
+          <li>{% block top_link_1 %}{% endblock %}</li>
+          <li class="active"><a href="/">event List</a></li>
+            {% if request.session.is_matchmaker %}
+                  <li><a href="/add-event">Add New event</a></li>
+            {% endif %}
+             {% if not request.path == '/login/' and not request.path == '/signup/' %}
+                    <li><a href="/logout/">Hello  {{ user.get_username }} @
+                        {% if request.session.is_matchmaker %}
+                            matchmaker
+                        {% elif request.session.is_single %}
+                            Writer
+                        {% endif %}
+                            , Logout</a></li>
+                {% elif request.path == '/login/' %}
+                    <li><a href="/signup/">Hello Guest, Signup</a></li>
+                 {% elif request.path == '/signup/' %}
+                    <li><a href="/login/">Hello Guest, Login</a></li>
+             {% endif %}
+            <li><a href="#"></a></li>
+        </ul>
+      </div><!--/.nav-collapse -->
+    </div>
+  </div>
+
+    <div>
+
+        {% block content %}
+            CONTENT
+        {% endblock %}
+
+    </div>
+
+</div>
+{#<script src="jquery-2.2.4.js"></script>#}
+<script language="javascript"  type="text/javascript" src="js/jquery-2.2.4.js"></script>
+
+{#</script>#}
+<script src="js/index.js"></script>
+</body>
+</html>

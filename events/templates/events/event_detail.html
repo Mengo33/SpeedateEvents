@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+    {% block top_link_1 %}
+        <a href="{% url "events:singles_list" %}">View singles</a>
+    {% endblock %}
+    {% if request.session.is_single %}
+            {% block top_link_2 %}
+                <a href="add-reply">Add Reply</a>
+            {% endblock %}
+    {% endif %}
+{% block content %}
+{#    <a href="{% url "events:list" %}">Back to all events</a>#}
+{#    &nbsp;#}
+    <ul class="list-group">
+        <br/>
+        <p class="event_label">title:</p>
+        <li class="list-group-item">
+            {{ object.title }}
+        </li>
+        {% if object.description %}
+            <br/>
+            <p class="event_label">description:</p>
+            <li class="list-group-item">
+                {{ object.description|linebreaks }}
+            </li>
+        {% endif %}
+        <br/>
+        <p class="event_label">link:</p>
+        <li class="list-group-item">
+            {{ object.link }}
+        </li>
+        <br/>
+        <p class="event_label">due date:</p>
+        <li class="list-group-item">
+            {{ object.date }}
+        </li>
+        <br/>
+        <p class="event_label">singles num:</p>
+        <li class="list-group-item">
+          {{ object.singles_num }}
+        </li>
+    </ul>
+{% endblock %}

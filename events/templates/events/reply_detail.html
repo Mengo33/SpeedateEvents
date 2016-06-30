@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+        {% block top_link_1 %}
+            <a href="{% url "events:singles_list" %}">Back to all singles</a>
+        {% endblock %}
+{% block content %}
+    <ul class="list-group">
+        <br/>
+        <p class="event_label">writer:</p>
+        <li class="list-group-item">
+            {{ object.writer.writer_user.profile_user.get_full_name }}
+        </li>
+        <br/>
+        <p class="event_label">event:</p>
+        <li class="list-group-item">
+            {{ object.event.title }}
+        </li>
+        <br/>
+        <p class="event_label">status:</p>
+        <li class="list-group-item">
+            {{ object.get_status_display }}
+        </li>
+        <br/>
+        <p class="event_label">created at:</p>
+        <li class="list-group-item">
+            {{ object.created_at }}
+        </li>
+        <br/>
+        <p class="event_label">posted at:</p>
+        <li class="list-group-item">
+            {{ object.posted_at }}
+        </li>
+        <br/>
+        <p class="event_label">reply link:</p>
+        <li class="list-group-item">
+            {{ object.reply_link }}
+        </li>
+        <br/>
+        <p class="event_label">reply text:</p>
+        <li class="list-group-item">
+            {{ object.reply_text|linebreaks }}
+        </li>
+    </ul>
+{% endblock %}

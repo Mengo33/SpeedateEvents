@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load staticfiles bootstrap3 %}
+
+{% block content %}
+    {% bootstrap_messages %}
+    {% if object_list %}
+
+        <table class="table table-bordered col-ms-6">
+            <thead>
+            <tr>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Due Date</th>
+                <th>Link</th>
+                <th>Singles Num</th>
+                <th>Singles Approved</th>
+                <th>Owner</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for object in object_list %}
+                <tr>
+                    <td><a href="{{ object.get_absolute_url }}">{{ object.title }}</a></td>
+                    <td>{{ object.description }}</td>
+                    <td>{{ object.date }}</td>
+                    <td>{{ object.link }}</td>
+                    <td>{{ object.singles_num }}</td>
+                    <td>{{ object.singles_approved }}</td>
+                    <td>{{ object.owner.event_user.profile_user.get_full_name }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+{% bootstrap_pagination page_obj %}
+     {% else %}
+        No events Yet.
+    {% endif %}
+{% endblock %}
