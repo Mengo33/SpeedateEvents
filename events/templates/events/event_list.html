@@ -26,7 +26,8 @@
                     <td>{{ object.link }}</td>
                     <td>{{ object.singles_num }}</td>
                     <td>{{ object.singles_approved }}</td>
-                    <td>{{ object.owner.event_user.profile_user.get_full_name }}</td>
+                    <td>{{ object.owner.event_user.user.get_username }}</td>
+{#                    <td>{{ object.owner.event_user.user.get_full_name }}</td>#}
                 </tr>
             {% endfor %}
             </tbody>

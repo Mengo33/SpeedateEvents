@@ -25,9 +25,10 @@ class Status:
     )
 
 
-class ProfileUser(models.Model):
-    profile_user = models.OneToOneField(
+class Profile(models.Model):
+    user = models.OneToOneField(
         User,
+        unique=True,
         on_delete=models.CASCADE, )
 
     gender = models.IntegerField(choices=Gender.choices)
@@ -44,10 +45,14 @@ class ProfileUser(models.Model):
 
     # TODO 1) add data members \ methods that aren't in models.User
     # TODO 2) Ask Udi \ google about having to do this  class abstract while this is also a FK
+    def __str__(self):
+        return "{}".format(
+                    self.user.username,
+                )
 
 
 class Event(models.Model):
-    owner = models.ForeignKey(ProfileUser)
+    owner = models.ForeignKey(Profile)
     title = models.CharField(max_length=100)
     description = models.TextField(max_length=500)
     link = models.URLField()

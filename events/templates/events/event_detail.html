@@ -3,13 +3,13 @@
     {% block top_link_1 %}
         <a href="{% url "events:singles_list" %}">View singles</a>
     {% endblock %}
-    {% if request.session.is_single %}
+    {% if request.user.is_single %}
             {% block top_link_2 %}
                 <a href="add-reply">Add Reply</a>
             {% endblock %}
     {% endif %}
 {% block content %}
-{#    <a href="{% url "events:list" %}">Back to all events</a>#}
+{#    <a href="{% url "events:user_list" %}">Back to all events</a>#}
 {#    &nbsp;#}
     <ul class="list-group">
         <br/>

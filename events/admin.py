@@ -25,13 +25,24 @@ class EventAdmin(admin.ModelAdmin):
     )
 
 
-class ProfileUserAdmin(admin.ModelAdmin):
+class ProfileAdmin(admin.ModelAdmin):
     list_display = (
-        'profile_user_id',
-        'is_matchmaker',
+        'user_id',
+        'gender',
+        'dob',
+        'is_cohen',
         'is_single',
+        'is_matchmaker',
+    )
+    list_filter = (
+        'gender',
+        'dob',
+        'status',
+        'is_cohen',
+        'is_single',
+        'is_matchmaker',
     )
 
 
 admin.site.register(models.Event, EventAdmin)
-admin.site.register(models.ProfileUser, ProfileUserAdmin)
+admin.site.register(models.Profile, ProfileAdmin)

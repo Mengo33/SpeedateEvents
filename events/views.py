@@ -2,6 +2,7 @@ import datetime
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.shortcuts import redirect
 from django.utils.encoding import escape_uri_path
@@ -10,6 +11,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, FormView
 from django.views.generic.list import ListView
 
+from events.models import Status
 from . import forms
 from . import models
 
@@ -22,6 +24,8 @@ class LoggedInMixin:
             return redirect(url)
         return super().dispatch(request, *args, **kwargs)
 
+    pass
+
 
 class LoginView(FormView):
     page_title = "Login"
@@ -30,7 +34,7 @@ class LoginView(FormView):
 
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated():
-            return redirect('events:list')
+            return redirect('events:user_list')
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
@@ -41,15 +45,6 @@ class LoginView(FormView):
             if user.is_active:
                 login(self.request, user)
 
-                if models.ProfileUser.objects.filter(profile_user_id=self.request.user.pk):
-                    pu = models.ProfileUser.objects.get(profile_user_id=self.request.user.pk)
-                    if pu.is_matchmaker:
-                        self.request.session['is_matchmaker'] = True
-                        self.request.session['is_single'] = False
-                    elif pu.is_single:
-                        self.request.session['is_single'] = True
-                        self.request.session['is_matchmaker'] = False
-
                 if self.request.GET.get('from'):
                     return redirect(
                         self.request.GET['from'])  # SECURITY: check path
@@ -59,7 +54,7 @@ class LoginView(FormView):
         else:
             form.add_error(None, "username doesn't exist")
             return self.form_invalid(form)
-        return redirect('events:list')
+        return redirect('events:user_list')
 
 
 class SignupView(FormView):
@@ -69,7 +64,7 @@ class SignupView(FormView):
 
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated():
-            return redirect('events:list')
+            return redirect('events:user_list')
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
@@ -84,24 +79,15 @@ class SignupView(FormView):
 
         # Add new user instance
         user = User.objects.create_user(**form.cleaned_data)
-        user = authenticate(**form.cleaned_data)
+        # user = authenticate(**form.cleaned_data)
 
-        # Add new user to ProfileUser
-        pu = models.ProfileUser(profile_user=user, )
-        # pu.full_clean()
-        # pu.save()
-
-        # Check if matchmaker or single
-        if is_matchmaker:
-            pu.is_matchmaker = True
-            self.request.session['is_matchmaker'] = True
-            self.request.session['is_single'] = False
-            # TODO - add a line to log
-        elif is_single:
-            pu.is_single = True
-            self.request.session['is_single'] = True
-            self.request.session['is_matchmaker'] = False
-            # TODO - add a line to log
+        # Add new user to Profile
+        pu = models.Profile(user=user, )
+        pu.gender = form.cleaned_data['gender']
+        pu.status = Status.SINGLE if form.cleaned_data['status'] == 'single' else Status.DIVORCEE
+        pu.is_cohen = form.cleaned_data['is_cohen']
+        pu.is_single = form.cleaned_data['is_single']
+        pu.is_matchmaker = form.cleaned_data['is_matchmaker']
         pu.full_clean()
         pu.save()
 
@@ -115,7 +101,7 @@ class SignupView(FormView):
             if self.request.GET.get('from'):
                 return redirect(
                     self.request.GET['from'])  # SECURITY: check path
-            return redirect('events:list')
+            return redirect('events:user_list')
 
 
 class LogoutView(View):
@@ -124,20 +110,15 @@ class LogoutView(View):
         return redirect("login")
 
 
-class ListeventView(LoggedInMixin, ListView):
-    page_title = "event list"
-    model = models.Event
-    paginate_by = 5
+class ListUserView(LoggedInMixin, ListView):
+    page_title = "users list"
+    model = models.Profile
+    paginate_by = 50
 
-    def get_queryset(self):
-        # if self.request.user.is_authenticated():
-        if 'is_single' in self.request.session:
-            # if self.request.session['is_single']:
-            # return super().get_queryset().all()
-            if self.request.session['is_matchmaker']:
-                return super().get_queryset().filter(
-                    owner=models.ProfileUser.objects.get(
-                        profile_user=self.request.user.pk))
+    def dispatch(self, request, *args, **kwargs):
+        if self.request.user.is_active and self.request.user.profile.is_single:
+            return redirect("events:home")
+        return super().dispatch(request, *args, **kwargs)
 
 
 class CreateEventView(LoggedInMixin, CreateView):
@@ -151,11 +132,10 @@ class CreateEventView(LoggedInMixin, CreateView):
         'singles_num',
     )
 
-    success_url = reverse_lazy('events:list')
+    success_url = reverse_lazy('events:user_list')
 
     def dispatch(self, request, *args, **kwargs):
-        if self.request.session['is_single']:
-            # url = reverse("/")
+        if self.request.user.profile.is_single:
             return redirect("/")
         return super().dispatch(request, *args, **kwargs)
 
@@ -165,13 +145,30 @@ class CreateEventView(LoggedInMixin, CreateView):
     #     return d
 
     def form_valid(self, form):
-        pu = models.ProfileUser.objects.get(
-            profile_user_id=self.request.user.pk)
-        form.instance.owner = models.ProfileUser.objects.get(
-            profile_user=pu.pk)
+        pu = models.Profile.objects.get(
+            user_id=self.request.user.pk)
+        form.instance.owner = models.Profile.objects.get(
+            user=pu.pk)
         resp = super().form_valid(form)
-        # messages.SUCCESS(self.request, "event added successfully.") #TODO formating
+        # messages.SUCCESS(self.request, "event added successfully.") #TODO
         return resp
+
+
+class ListEventView(LoggedInMixin, ListView):
+    page_title = "event list"
+    model = models.Event
+    paginate_by = 5
+
+    def get_queryset(self):
+        # if self.request.user.is_single:
+        # return super().get_queryset().all()
+        try:
+            if self.request.user.profile.is_matchmaker:
+                return super().get_queryset().filter(
+                    owner=models.Profile.objects.get(
+                        user=self.request.user.pk))
+        except ObjectDoesNotExist:
+            print("This user must be a Matchmaker or Single.")
 
 
 class EventDetailView(LoggedInMixin, DetailView):
@@ -189,11 +186,11 @@ class EventDetailView(LoggedInMixin, DetailView):
 #         'reply_text',
 #     )
 #
-#     success_url = reverse_lazy('events:list')
+#     success_url = reverse_lazy('events:user_list')
 #
 #     def form_valid(self, form):
-#         pu = models.ProfileUser.objects.get(
-#             profile_user_id=self.request.user.pk)
+#         pu = models.Profile.objects.get(
+#             user_id=self.request.user.pk)
 #         form.instance.writer = models.WriterUser.objects.get(
 #             writer_user_id=pu.pk)
 #
@@ -245,12 +242,12 @@ class EventDetailView(LoggedInMixin, DetailView):
 #         elif self.request.session['is_single']:
 #             return super().get_queryset().filter(
 #                 writer=models.WriterUser.objects.get(
-#                     writer_user_id=models.ProfileUser.objects.get(
-#                         profile_user=self.request.user.pk)))
+#                     writer_user_id=models.Profile.objects.get(
+#                         user=self.request.user.pk)))
 
-# class CreateProfileUserView(LoggedInMixin, CreateView):
+# class CreateProfileView(LoggedInMixin, CreateView):
 #     page_title = "Edit Profile Details"
-#     model = models.ProfileUser
+#     model = models.Profile
 #     fields = (
 #         'email'
 #         'phone'
