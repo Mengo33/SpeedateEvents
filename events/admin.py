@@ -29,6 +29,7 @@ class ProfileAdmin(admin.ModelAdmin):
     list_display = (
         'user_id',
         'gender',
+        'status',
         'dob',
         'is_cohen',
         'is_single',
@@ -36,8 +37,8 @@ class ProfileAdmin(admin.ModelAdmin):
     )
     list_filter = (
         'gender',
-        'dob',
         'status',
+        'dob',
         'is_cohen',
         'is_single',
         'is_matchmaker',
