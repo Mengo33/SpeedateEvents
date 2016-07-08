@@ -1,3 +1,6 @@
+from datetime import date
+
+from django.conf.global_settings import MEDIA_ROOT
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db import models
@@ -35,6 +38,8 @@ class Profile(models.Model):
     status = models.IntegerField(choices=Status.choices, default=Status.SINGLE)
     dob = models.DateField(null=True, blank=True)
     is_cohen = models.BooleanField(default=False)
+    picture = models.ImageField(upload_to=MEDIA_ROOT, default=MEDIA_ROOT + '/no-image.jpg')
+
     # country = models.CharField(max_length=50, null=True, blank=True)
     # address = models.CharField(max_length=100, null=True, blank=True)
     # city = models.CharField(max_length=50, null=True, blank=True)
@@ -43,12 +48,17 @@ class Profile(models.Model):
     is_matchmaker = models.BooleanField(default=False)
     is_single = models.BooleanField(default=False)
 
-    # TODO 1) add data members \ methods that aren't in models.User
-    # TODO 2) Ask Udi \ google about having to do this  class abstract while this is also a FK
+    def calculate_age(self):
+        age = 0
+        today = date.today()
+        if self.dob:
+            age = today.year - self.dob.year - ((today.month, today.day) < (self.dob.month, self.dob.day))
+        return age
+
     def __str__(self):
         return "{}".format(
-                    self.user.username,
-                )
+            self.user.username,
+        )
 
 
 class Event(models.Model):

@@ -34,6 +34,7 @@ class ProfileAdmin(admin.ModelAdmin):
         'is_cohen',
         'is_single',
         'is_matchmaker',
+        'picture',
     )
     list_filter = (
         'gender',

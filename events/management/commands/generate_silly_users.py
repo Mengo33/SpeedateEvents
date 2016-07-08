@@ -28,13 +28,23 @@ class Command(BaseCommand):
                 status = Status.DIVORCEE if randint(1, 4) == 4 else Status.SINGLE
                 dob = silly.datetime().date()
                 is_cohen = True if randint(1, 6) == 6 else False
+                picture = "text"
+                while "placekitten" not in picture:
+                    picture = silly.image(width=i+140*2, height=i+95*2).replace(" ", "%20")
                 is_single = True
 
                 # is_single = True if round(i % 3, 1) == randint(0, 1) else False
                 user = User.objects.create_user("{}".format(user_name), email, password)
                 # Add new user to Profile
                 pu = models.Profile(
-                    user=user, gender=gender, status=status, dob=dob, is_cohen=is_cohen, is_single=is_single)
+                    user=user,
+                    gender=gender,
+                    status=status,
+                    dob=dob,
+                    is_cohen=is_cohen,
+                    is_single=is_single,
+                    picture=picture,
+                )
                 pu.full_clean()
                 pu.save()
             except IntegrityError:

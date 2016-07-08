@@ -5,33 +5,24 @@
     {% bootstrap_messages %}
     {% if object_list %}
 
-        <table class="table table-bordered col-ms-6">
-            <thead>
-            <tr>
-                <th>User Name</th>
-                <th>DOB</th>
-                <th>Gender</th>
-                <th>Status</th>
-                <th>Is Cohen</th>
-{#                <th>Is Single</th>#}
-{#                <th>Is Matchmaker</th>#}
-            </tr>
-            </thead>
-            <tbody>
             {% for object in object_list %}
-                <tr>
-                    <td><a href="{{ object.get_absolute_url }}">{{ object.user }}</a></td>
-                    <td>{{ object.dob }}</td>
-                    <td>{{ object.get_gender_display }}</td>
-                    <td>{{ object.get_status_display }}</td>
-                    <td>{{ object.is_cohen|yesno }}</td>
-{#                    <td>{{ object.is_matchmaker }}</td>#}
-{#                    <td>{{ object.is_single }}</td>#}
-                </tr>
+                        <a href="{{ object.get_absolute_url }}">
+                            <div  class="user_card">
+                                {% if "http" not in object.picture %} {# TODO CORECT IF#}
+                                    <img src="{% static object.picture %}" class="img-responsive" alt="image"><br/>
+                                {% else %}
+                                    <img src="{{ object.picture }}" class="img-responsive" alt="image"><br/>
+                                {% endif %}
+                                Name: {{ object.user }}<br/>
+                                Age: {{ object.calculate_age }}<br/>
+                                Dob: {{ object.dob }}<br/>
+                                Gender: {{ object.get_gender_display }}<br/>
+                                Status: {{ object.get_status_display }}<br/>
+                                Is Cohen: {{ object.is_cohen|yesno }}<br/>
+                            </div>
+                        </a>
             {% endfor %}
-            </tbody>
-        </table>
-    {% bootstrap_pagination page_obj %}
+        {% bootstrap_pagination page_obj %}
 
     {% else %}
         No users Yet.

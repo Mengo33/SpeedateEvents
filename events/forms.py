@@ -26,14 +26,14 @@ class SignupForm(ModelForm):
             'password',
             'password_confirm',
             'email',
+            'dob',
             'gender',
             'status',
             'is_cohen',
             'is_matchmaker',
             'is_single',
+            'picture',
         ]
-
-
 
 # class SignupForm(forms.Form):
 #     first_name = forms.CharField(max_length=300)

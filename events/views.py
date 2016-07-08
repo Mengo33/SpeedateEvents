@@ -7,6 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse_lazy, reverse
 import django.forms
 from django.db import IntegrityError
+from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.utils.encoding import escape_uri_path
 from django.views.generic import View
@@ -67,16 +68,6 @@ class CreateUserView(CreateView):
 
     success_url = reverse_lazy('events:user_list')
 
-    # def dispatch(self, request, *args, **kwargs):
-    #     if request.user.is_authenticated():
-    #         return redirect('events:user_list')
-    #     return super().dispatch(request, *args, **kwargs)
-
-    # def get_initial(self):
-    #     d = super().get_initial()
-    #     d['date'] = datetime.date.today()
-    #     return d
-
     def form_valid(self, form):
         if form.cleaned_data['password'] != form.cleaned_data.pop('password_confirm'):
             form.add_error(None, "Passwords do not match")
@@ -86,9 +77,11 @@ class CreateUserView(CreateView):
         if is_matchmaker == is_single:
             form.add_error(None, "User must be a matchmaker or writer (not both).")
             return self.form_invalid(form)
+        dob = form.cleaned_data.pop('dob')
         gender = form.cleaned_data.pop('gender')
         status = form.cleaned_data.pop('status')
         is_cohen = form.cleaned_data.pop('is_cohen')
+        picture = form.cleaned_data.pop('picture')
 
         # Add new user instance
         try:
@@ -100,11 +93,13 @@ class CreateUserView(CreateView):
 
         # Add new user to Profile
         pu = models.Profile(user=user, )
+        pu.dob = dob
         pu.gender = gender
         pu.status = status
         pu.is_cohen = is_cohen
         pu.is_single = is_single
         pu.is_matchmaker = is_matchmaker
+        pu.picture = picture
         pu.full_clean()
         pu.save()
 
@@ -134,7 +129,7 @@ class LogoutView(View):
 class ListUserView(LoggedInMixin, ListView):
     page_title = "Users List"
     model = models.Profile
-    paginate_by = 50
+    paginate_by = 20
 
     def dispatch(self, request, *args, **kwargs):
         if self.request.user.is_active and self.request.user.profile.is_single:
