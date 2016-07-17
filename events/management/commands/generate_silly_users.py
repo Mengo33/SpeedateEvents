@@ -36,7 +36,7 @@ class Command(BaseCommand):
                 # is_single = True if round(i % 3, 1) == randint(0, 1) else False
                 user = User.objects.create_user("{}".format(user_name), email, password)
                 # Add new user to Profile
-                pu = models.Profile(
+                p = models.Profile(
                     user=user,
                     gender=gender,
                     status=status,
@@ -45,8 +45,8 @@ class Command(BaseCommand):
                     is_single=is_single,
                     picture=picture,
                 )
-                pu.full_clean()
-                pu.save()
+                p.full_clean()
+                p.save()
             except IntegrityError:
                 print("UNIQUE constraint failed: auth_user.username")
         print("OK")

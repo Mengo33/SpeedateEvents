@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% load staticfiles bootstrap3 %}
 
+{% block top_link_1 %}
+    <a href="{% url "events:event_list" %}">View events</a>
+{% endblock %}
+
 {% block content %}
     {% bootstrap_messages %}
     {% if object_list %}
@@ -8,11 +12,11 @@
             {% for object in object_list %}
                         <a href="{{ object.get_absolute_url }}">
                             <div  class="user_card">
-                                {% if "http" not in object.picture %} {# TODO CORECT IF#}
-                                    <img src="{% static object.picture %}" class="img-responsive" alt="image"><br/>
-                                {% else %}
-                                    <img src="{{ object.picture }}" class="img-responsive" alt="image"><br/>
-                                {% endif %}
+{#                                {% if "http" not in object.picture %} {# TODO CORECT IF#}
+{#                                    <img src="{% static object.picture %}" class="img-responsive" alt="image"><br/>#}
+{#                                {% else %}#}
+                                    <img src="{{ MEDIA_URL }}{{ object.picture }}" class="img-responsive" alt="image"><br/>
+{#                                {% endif %}#}
                                 Name: {{ object.user }}<br/>
                                 Age: {{ object.calculate_age }}<br/>
                                 Dob: {{ object.dob }}<br/>

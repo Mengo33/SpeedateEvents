@@ -1,43 +1,24 @@
 {% extends "base.html" %}
 
-    {% block top_link_1 %}
-        <a href="{% url "events:singles_list" %}">View singles</a>
-    {% endblock %}
-    {% if request.user.is_single %}
-            {% block top_link_2 %}
-                <a href="add-reply">Add Reply</a>
-            {% endblock %}
+{% block top_link_1 %}
+    <a href="{% url "events:event_list" %}">View events</a>
+{% endblock %}
+
+{% block top_link_2 %}
+    {% if request.user.is_matchmaker %}
+            <a href="events:user_list">View Users</a>
+    {% elif request.user.is_single %}
+            <a href="###">Add Reply</a>
     {% endif %}
+{% endblock %}
 {% block content %}
-{#    <a href="{% url "events:user_list" %}">Back to all events</a>#}
-{#    &nbsp;#}
-    <ul class="list-group">
-        <br/>
-        <p class="event_label">title:</p>
-        <li class="list-group-item">
-            {{ object.title }}
-        </li>
+    <div class="event_announcement">
+        <h1>{{ object.title }}</h1><br/>
         {% if object.description %}
-            <br/>
-            <p class="event_label">description:</p>
-            <li class="list-group-item">
-                {{ object.description|linebreaks }}
-            </li>
+            <h2>{{ object.description|linebreaks }}</h2>
         {% endif %}
-        <br/>
-        <p class="event_label">link:</p>
-        <li class="list-group-item">
-            {{ object.link }}
-        </li>
-        <br/>
-        <p class="event_label">due date:</p>
-        <li class="list-group-item">
-            {{ object.date }}
-        </li>
-        <br/>
-        <p class="event_label">singles num:</p>
-        <li class="list-group-item">
-          {{ object.singles_num }}
-        </li>
-    </ul>
+
+        <h3>At {{ object.date }}</h3>
+        <h3>The event is only for the first {{ object.singles_num }} singles only.</h3>
+    </div>
 {% endblock %}

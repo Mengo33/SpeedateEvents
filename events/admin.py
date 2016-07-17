@@ -9,7 +9,6 @@ class EventAdmin(admin.ModelAdmin):
         'id',
         'title',
         'description',
-        'link',
         'date',
         'singles_num',
     )

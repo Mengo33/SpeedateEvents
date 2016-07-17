@@ -29,9 +29,9 @@ class Command(BaseCommand):
             # user.save()
 
             # Add new user to Profile
-            pu = models.Profile(
+            p = models.Profile(
                 user=user, gender=gender, status=status, dob=dob, is_cohen=is_cohen, is_single=is_single)
 
-            # pu.is_single = True
-            pu.full_clean()
-            pu.save()
+            # pis_single = True
+            pfull_clean()
+            psave()

@@ -1,6 +1,12 @@
 {% extends "base.html" %}
 {% load staticfiles bootstrap3 %}
 
+{% block top_link_2 %}
+    {% if request.user.is_matchmaker %}
+            <a href="/">View Users</a>
+    {% endif %}
+{% endblock %}
+
 {% block content %}
     {% bootstrap_messages %}
     {% if object_list %}
@@ -11,7 +17,6 @@
                 <th>Title</th>
                 <th>Description</th>
                 <th>Due Date</th>
-                <th>Link</th>
                 <th>Singles Num</th>
                 <th>Singles Approved</th>
                 <th>Owner</th>
@@ -23,10 +28,9 @@
                     <td><a href="{{ object.get_absolute_url }}">{{ object.title }}</a></td>
                     <td>{{ object.description }}</td>
                     <td>{{ object.date }}</td>
-                    <td>{{ object.link }}</td>
                     <td>{{ object.singles_num }}</td>
                     <td>{{ object.singles_approved }}</td>
-                    <td>{{ object.owner.event_user.user.get_username }}</td>
+                    <td>{{ object.owner.user.get_full_name }}</td>
 {#                    <td>{{ object.owner.event_user.user.get_full_name }}</td>#}
                 </tr>
             {% endfor %}

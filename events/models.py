@@ -65,9 +65,8 @@ class Event(models.Model):
     owner = models.ForeignKey(Profile)
     title = models.CharField(max_length=100)
     description = models.TextField(max_length=500)
-    link = models.URLField()
     date = models.DateField()
-    singles_num = models.IntegerField(default=1)
+    singles_num = models.IntegerField(default=60)
     singles_approved = models.IntegerField(default=0)
 
     def get_absolute_url(self):

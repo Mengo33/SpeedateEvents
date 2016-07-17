@@ -1,13 +1,9 @@
-import datetime
-
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.mail import send_mail
 from django.core.urlresolvers import reverse_lazy, reverse
-import django.forms
 from django.db import IntegrityError
-from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.utils.encoding import escape_uri_path
 from django.views.generic import View
@@ -92,16 +88,16 @@ class CreateUserView(CreateView):
             return self.form_invalid(form)
 
         # Add new user to Profile
-        pu = models.Profile(user=user, )
-        pu.dob = dob
-        pu.gender = gender
-        pu.status = status
-        pu.is_cohen = is_cohen
-        pu.is_single = is_single
-        pu.is_matchmaker = is_matchmaker
-        pu.picture = picture
-        pu.full_clean()
-        pu.save()
+        p = models.Profile(user=user, )
+        p.dob = dob
+        p.gender = gender
+        p.status = status
+        p.is_cohen = is_cohen
+        p.is_single = is_single
+        p.is_matchmaker = is_matchmaker
+        p.picture = picture
+        p.full_clean()
+        p.save()
 
         # Login
         if user is not None:
@@ -138,17 +134,16 @@ class ListUserView(LoggedInMixin, ListView):
 
 
 class CreateEventView(LoggedInMixin, CreateView):
-    page_title = "Event Adding - Form"
+    page_title = "Create an Event"
     model = models.Event
     fields = (
         'title',
         'description',
-        # 'link',
         'date',
         'singles_num',
     )
 
-    success_url = reverse_lazy('events:user_list')
+    success_url = reverse_lazy('events:event_list')
 
     def dispatch(self, request, *args, **kwargs):
         if self.request.user.profile.is_single:
@@ -161,28 +156,47 @@ class CreateEventView(LoggedInMixin, CreateView):
     #     return d
 
     def form_valid(self, form):
-        pu = models.Profile.objects.get(
-            user_id=self.request.user.pk)
-        form.instance.owner = models.Profile.objects.get(
-            user=pu.pk)
-        resp = super().form_valid(form)
-        # messages.SUCCESS(self.request, "event added successfully.") #TODO
+        if form.is_valid:
+            owner = models.Profile.objects.get(
+                user_id=self.request.user.pk)
+            form.instance.owner = owner
+
+            title = form.cleaned_data['title']
+            description = form.cleaned_data['description']
+            date = form.cleaned_data['date']
+            singles_num = form.cleaned_data['singles_num']
+
+            email_list = []
+            for item in models.Profile.objects.all().values('user__email'):
+                email_list.append(item['user__email'])
+
+            send_mail(
+                title,
+                "Hello,\n\n{}\nAt {}\nThe event is only for the first {}  singles only.\nSincerely,\n{}".format(
+                    description, date, singles_num, owner),
+                'menahem.godick@gmail.com',
+                email_list,
+                fail_silently=False,
+            )
+
+            resp = super().form_valid(form)
+            # messages.SUCCESS(self.request, "Event added successfully.") #TODO
         return resp
 
 
 class ListEventView(LoggedInMixin, ListView):
     page_title = "event list"
     model = models.Event
-    paginate_by = 5
+    paginate_by = 15
 
-    def get_queryset(self):
-        try:
-            if self.request.user.profile.is_matchmaker:
-                return super().get_queryset().filter(
-                    owner=models.Profile.objects.get(
-                        user=self.request.user.pk))
-        except ObjectDoesNotExist:
-            print("This user must be a Matchmaker or Single.")
+    # def get_queryset(self):
+    #     try:
+    #         if self.request.user.profile.is_matchmaker:
+    #             return super().get_queryset().filter(
+    #                 owner=models.Profile.objects.get(
+    #                     user=self.request.user.pk))
+    #     except ObjectDoesNotExist:
+    #         print("This user must be a Matchmaker or Single.")
 
 
 class EventDetailView(LoggedInMixin, DetailView):
